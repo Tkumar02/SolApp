@@ -1,0 +1,16 @@
+<div class="main-container justify-content-center align-items-center gap-8">
+    <h2>Add instrument</h2>
+    <div class="text-center">
+        <h3>Current Instruments</h3>
+        <div *ngFor="let instrument of allInstruments; let i=index" class="d-flex justify-content-end p-1">
+            <h5 >{{instrument.instrument}} - </h5>
+            <button (click)="deleteInstrument(i)" class="btn btn-danger">Remove</button>
+        </div>
+    </div>
+    <button class="btn btn-primary" (click)="instrumentBox=true">New Instrument</button>
+    <div *ngIf="instrumentBox" class="d-flex flex-column align-items-center gap-8">
+        <input type="text" [(ngModel)]="newInstrument">
+        <button (click)="confirmInstrument()" class="btn btn-success" [disabled]="!newInstrument">Confirm</button>
+    </div>
+    
+</div>

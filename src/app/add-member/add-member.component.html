@@ -1,0 +1,43 @@
+<div class="container">
+    <h2>Add New Member</h2>
+    <form [formGroup]="instrumentForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Name input -->
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input id="name" formControlName="name" class="form-control" placeholder="Enter your name">
+        <div *ngIf="instrumentForm.controls['name'].invalid && instrumentForm.controls['name'].touched">
+          Name is required.
+        </div>
+      </div>
+      
+      <!-- Instruments input -->
+      <!-- <div formGroupName="instruments">
+        <div class="form-group" *ngFor="let i of [1, 2, 3, 4, 5, 6, 7]; let idx = index">
+          <label for="instrument{{i}}">Instrument {{i}}:</label>
+          <input id="instrument{{i}}" formControlName="instrument{{i}}" class="form-control" placeholder="Enter instrument {{i}}">
+          <select [(ngModel)]="">
+            <option *ngFor="let instrument of allInstruments; let i=index" value="">{{instrument.instrument}}</option>
+          </select>
+          <div *ngIf="instrumentForm.get('instruments.instrument' + i)?.invalid && instrumentForm.get('instruments.instrument' + i)?.touched">
+            Instrument {{i}} is required.
+          </div>
+        </div>
+      </div> -->
+
+      <div formArrayName="instruments">
+        <div class="form-group" *ngFor="let instrument of instruments.controls; let i = index">
+          <label for="instrument{{i}}">Instrument {{i + 1}} (optional):</label>
+          <select [id]="'instrument' + i" [formControlName]="i" class="form-control">
+            <option value="" disabled>Select an instrument</option>
+            <option *ngFor="let instr of allInstruments" [value]="instr.instrument">{{ instr.instrument }}</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Submit Button -->
+      <button class="btn btn-success" type="submit" [disabled]="instrumentForm.invalid">Submit</button>
+    </form>
+  </div>
+  
+  

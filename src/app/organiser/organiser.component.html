@@ -1,0 +1,24 @@
+<div>
+    <h1>Gig X</h1>
+    <h2>Signed up members:</h2>
+    <div *ngFor="let member of members; let i=index">
+        <h3>{{member.name}}</h3>
+    </div>
+    <button class="btn btn-success" (click)="allocateMembers()">Allocate Members</button>
+    <div *ngIf="membersAllocated">
+        <h3>Roller: </h3>
+        <p>{{rollerI}}</p>
+        <h3>Marking: </h3>
+        <p>{{markingI}}</p>
+        <h3>Timbal: </h3>
+        <p>{{timbalI}}</p>
+        <h3>Rep: </h3>
+        <p>{{repI}}</p>
+        <h3>Caixa: </h3>
+        <p>{{caixaI}}</p>
+        <h3>Third: </h3>
+        <p>{{thirdI}}</p>
+        <h3>Shaker: </h3>
+        <p>{{shakerI}}</p>
+    </div>
+</div>
