@@ -17,6 +17,8 @@ import { AddMemberComponent } from './add-member/add-member.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ManageMembersComponent } from './manage-members/manage-members.component';
 import { AddInstrumentComponent } from './add-instrument/add-instrument.component';
+import { MemberEditComponent } from './member-edit/member-edit.component';
+import { InactiveMembersComponent } from './inactive-members/inactive-members.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { AddInstrumentComponent } from './add-instrument/add-instrument.componen
     NavbarComponent,
     ManageMembersComponent,
     AddInstrumentComponent,
+    MemberEditComponent,
+    InactiveMembersComponent,
   ],
   imports: [
     BrowserModule,

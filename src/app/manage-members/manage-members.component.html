@@ -1,1 +1,32 @@
-<p>manage-members works!</p>
+<div class="container">
+    <div class="membersTable">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Instruments</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let member of allmembers; let i = index">
+                    <!-- Apply a dynamic class based on the index of the member -->
+                    <ng-container *ngIf="getValidInstruments(member).length > 0">
+                        <!-- First row with the member's name and first instrument -->
+                        <tr [ngClass]="{'table-one': i % 2 === 0, 'table-two': i % 2 !== 0}">
+                            <td [attr.rowspan]="getValidInstruments(member).length">{{member.name}}</td>
+                            <td>{{getValidInstruments(member)[0]}}</td>
+                            <td [attr.rowspan]="getValidInstruments(member).length">
+                                <button class="btn btn-secondary" (click)="editMember(member.id)">Edit</button>
+                            </td>
+                        </tr>
+                        <!-- Additional rows for the remaining instruments, without member's name -->
+                        <tr *ngFor="let instrument of getValidInstruments(member).slice(1)" [ngClass]="{'table-one': i % 2 === 0, 'table-two': i % 2 !== 0}">
+                            <td>{{instrument}}</td>
+                        </tr>
+                    </ng-container>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>

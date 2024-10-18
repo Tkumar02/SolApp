@@ -1,0 +1,41 @@
+<div class="main-container d-flex flex-column align-items-center justify-content-center">
+    <div *ngIf="noMembers" class="mt-5">No Inactive Members at Present</div>
+    <table *ngIf="!noMembers" class="table table-striped mt-5">
+        <thead>
+            <th>Member</th>
+            <th>Action</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let member of inactive;let i=index">
+                <td>{{member.name}}</td>
+                <td>
+                    <button class="btn btn-primary mr-2" (click)="makeActive(i)">Make active</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" (click)="setMember(i)">Delete</button>
+
+                    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="myModalLabel">Remove Profile</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                            Deleting will permanently remove your member
+                            </div>
+                            <div class="modal-footer">
+                                <div class="gap-8 d-flex">
+                                    <button type="button" (click)="delete()" class="btn btn-danger" data-dismiss="modal">Permanently Delete</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

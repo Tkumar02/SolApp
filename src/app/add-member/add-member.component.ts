@@ -25,6 +25,8 @@ export class AddMemberComponent {
   }
 
   allInstruments: any;
+  allNames: Array<string> = [];
+  members: any;
 
   ngOnInit(): void{
     this.is.getAllInstruments().subscribe(val=>{
@@ -34,6 +36,11 @@ export class AddMemberComponent {
         this.instruments.push(this.fb.control(''));  // Add empty form control for each instrument
       }
     })
+    this.ms.getMembers().subscribe(val=>{
+      this.members = val;
+      this.allNames = this.members.map(member=>member.name)
+      console.log(this.allNames,'allNames')
+    })
   }
 
   get instruments(): FormArray {
@@ -42,8 +49,16 @@ export class AddMemberComponent {
 
   // Method to handle form submission
   onSubmit(): void {
+    const currentName = this.instrumentForm.value.name;
+    const nameExists = this.allNames.some(name => name.toLowerCase() === currentName.toLowerCase());
+  
+    if (nameExists) {
+      this.toast.error('Name already exists, please choose another name');
+      return;
+    }
+
     if (this.instrumentForm.valid) {
-      console.log('Form Data:', this.instrumentForm.value);
+      this.instrumentForm.value.instruments = this.instrumentForm.value.instruments.filter((instrument:string)=>instrument!==null && instrument!=='')
       this.ms.addMember(this.instrumentForm.value).then(()=>{
         this.toast.success('Member successfully added');
         this.instrumentForm.reset();

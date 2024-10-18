@@ -1,0 +1,8 @@
+.table-one {
+    background-color: rgb(193, 21, 21); /* Light grey for even rows */
+    color: white;
+}
+
+.table-two {
+    background-color: gold; /* White for odd rows */
+}
