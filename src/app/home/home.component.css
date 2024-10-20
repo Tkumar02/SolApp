@@ -1,0 +1,58 @@
+.banner{
+    background-image: url('/assets/SolSambaHeader.png');
+    background-size: cover; /* Ensures the entire image fits within the div */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-position: center;
+    height: 20vh;
+    width:100vw;
+    display: flex; /* Use Flexbox */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    border: 1px solid #ccc; /* Optional: for visibility */
+    color: gold;
+    text-shadow:
+    -1px -1px 0 rgb(222, 31, 31),  /* Top-left shadow */
+    1px -1px 0 black,   /* Top-right shadow */
+    -1px 1px 0 rgb(180, 25, 25),   /* Bottom-left shadow */
+    1px 1px 0 black; 
+}
+
+.main-container{
+    background-image: url('/assets/solSambaPic.png');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+}
+
+  /* Cards container layout */
+  .card-container {
+    margin-top: 6vh;
+    margin-bottom: 6vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem; /* Spacing between cards */
+  }
+  
+  /* Styling for each card */
+  .card {
+    background-color: red;
+    opacity: 0.7;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px); /* Hover effect */
+  }
+  
+  .card h2 {
+    font-size: 1.5rem;
+    color: yellow;
+    margin: 0;
+  }

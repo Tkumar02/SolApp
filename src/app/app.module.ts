@@ -19,6 +19,7 @@ import { ManageMembersComponent } from './manage-members/manage-members.componen
 import { AddInstrumentComponent } from './add-instrument/add-instrument.component';
 import { MemberEditComponent } from './member-edit/member-edit.component';
 import { InactiveMembersComponent } from './inactive-members/inactive-members.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { InactiveMembersComponent } from './inactive-members/inactive-members.co
     AddInstrumentComponent,
     MemberEditComponent,
     InactiveMembersComponent,
+    HomeComponent,
   ],
   imports: [
     BrowserModule,

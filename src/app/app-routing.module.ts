@@ -6,6 +6,7 @@ import { ManageMembersComponent } from './manage-members/manage-members.componen
 import { AddInstrumentComponent } from './add-instrument/add-instrument.component';
 import { MemberEditComponent } from './member-edit/member-edit.component';
 import { InactiveMembersComponent } from './inactive-members/inactive-members.component';
+import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
   {path:'org',component: OrganiserComponent},
@@ -13,7 +14,9 @@ const routes: Routes = [
   {path:'members', component:ManageMembersComponent},
   {path:'add-instrument', component:AddInstrumentComponent},
   {path:'edit/:id', component:MemberEditComponent},
-  {path:'inactive', component:InactiveMembersComponent}
+  {path:'inactive', component:InactiveMembersComponent},
+  {path:'',component:HomeComponent},
+  {path:'home',component:HomeComponent}
 ];
 
 @NgModule({
