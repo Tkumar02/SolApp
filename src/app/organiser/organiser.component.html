@@ -4,75 +4,33 @@
         
         <label for="gigName">Enter name of Gig: </label>
         <input type="text" [(ngModel)]="gigName">
+        <label for="gigType">Enter type of Gig: </label>
+        <select name="gigType" id="gigType" [(ngModel)]="gigType" (change)="checkGig()">
+            <option [value]="'Standing'">Standing</option>
+            <option [value]="'Procession'">Procession</option>
+        </select>
         <label for="gigDate">Enter date of Gig: </label>
         <input type="date" [(ngModel)]="gigDate">
         
     </div>
 
-    <!-- <div *ngFor="let member of memberList; let i=index">
-        <h3>{{member.name}}</h3>
-    </div> -->
-
     <div class="container">
         <h5>Select members:</h5>
-        <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
-            <div formArrayName="members" *ngFor="let member of members.controls; let i=index">
-                <div [formGroupName]="i" class="mb-3">
-                    <label for="memberSelect">Select Member {{ i + 1 }}</label>
-                    <select formControlName="name" class="form-control">
-                        <option *ngFor="let member of allMembers" [value]="member.name">{{member.name}}</option>
-                    </select>
-                </div>
+        <div class="grid-container">
+            <div *ngFor="let member of allMembers; let i = index" 
+                 class="grid-item" 
+                 [ngClass]="{'selected': member.selected}"
+                 (click)="toggleMemberSelection(member)">
+                <div class="mr-3">{{ member.name }}</div>
             </div>
-            <div class="d-flex flex-column mb-5">
-                <button type="button" class="btn btn-primary mb-3" (click)="addMember()">Add Member</button>
-            </div>
-            
-        </form>
-    </div>
-
-    <!-- <div class="container">
-        <form [formGroup]="instrumentForm" (ngSubmit)="submitInstruments()">
-            <div formArrayName="instruments" *ngFor="let instrument of instruments.controls; let i=index">
-                <div [formGroupName]="i" class="mb-3">
-                    <h5>Select Instruments and Priority order</h5>
-                    <label for="instrumentSelect">Select Instrument Priority {{ i + 1 }}</label>
-                    <select formControlName="name" class="form-control">
-                        <option *ngFor="let instrument of allInstruments" [value]="instrument.instrument">{{instrument.instrument}}</option>
-                    </select>
-                    <input formControlName="index" type="hidden" [value]="i">
-                </div>
-            </div>
-            <div class="d-flex flex-column mb-5">
-                <button type="button" class="btn btn-primary mb-3" (click)="addInstrument()">Add Instrument</button>
-            </div>
-            
-        </form>
-    </div> -->
-
-    <div class="instrument-container">
-        <div *ngFor="let obj of instrumentCount; let i=index" class="d-flex flex-column ml-5">
-            <div class="d-flex mb-2">
-                <div class="instrument">{{obj.instrument}}</div>
-                <div class="d-flex gap-8">
-                    <button (click)="decrement(i)">-</button>
-                    <span>{{instrumentCount[i].count}}</span>
-                    <button (click)="increment(i)">+</button>
-                </div>
-            </div>
-
         </div>
-    </div>
-
-
-    <div class="d-flex flex-column align-items-center">
-        <button class="btn btn-info mb-3" (click)="allocateMembers()">Allocate Members</button>
-        <div *ngIf="membersAllocated">
-            <div *ngFor="let member of final" class="mt-3 mb-3">
-                <h3>{{member.instrument}}: </h3>
-                <h4>{{member.name}}</h4>
+        <div class="d-flex flex-column align-items-center mt-2">
+            <button class="btn btn-primary" (click)="allocateMembers()">Allocate</button>
+        </div>
+        <div class="allocations">
+            <div *ngFor="let member of final">
+                {{member.name}} - {{member.instrument}}
             </div>
-            <button class="btn btn-success">Submit</button>
         </div>
     </div>
 </div>

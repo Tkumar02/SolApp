@@ -1,0 +1,37 @@
+1. allocate one instrument members
+2. allocate rep-leader
+3. allocate marking
+4. remove marking and rep-leader from instrument list
+5. if anyone only has one instrument left - allocate them to that instrument
+6. check how many people can play: timbal, roller, caixa, rep, third
+    if p = 1 for any of those instruments - allocate that person to that instrument
+7. list order of players by number of instruments they play
+8. allocate one person to each remaining instruments with no player associated so far as per their preference
+9. check how many people have been assigned a roller  (currentRollerTotal)
+10. check how many people have been assigned a third (currentThirdTotal)
+11. potentialRollers = roller only + roller higher in priority order compared to third + currentThirdTotal
+12. potentialThirds - third only + third higher in priority order compared to roller + currentRollerTotal
+13. current Cases:
+    1. correct ratio
+    3. too many rollers, not enough currentThirds
+        check if there is a third to add in so that the correct ratio is met
+            if enough thirds - allocate potentialThirdMember to third instrument
+            skip if none
+    2. too many thirds, not enough rollers
+        check if there are enough rollers in potential rollers 
+            allocate them accordingly
+            if none take them from the "both" group and assign them to third
+14. check members assigned to timbal, rep and roller
+    case 1 - each instrument group has the same number of members assigned  
+        1. assign one member to each group by priority order
+        check members again as per first step
+        do STEPS 9 AND 10
+    case 2 - instrument groups are not balanced
+        add member to balance it (by priority order)
+        check if groups are balanced
+        DO STEPS 9 AND 10
+
+
+jack = ['timbal','rep','roller']
+jack2 = ['roller','rep']
+jack3 = ['timbal','roller']

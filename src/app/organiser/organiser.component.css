@@ -1,11 +1,21 @@
-.instrument{
-    width: 150px;
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 5 equal-width columns */
+    gap: 10px; /* Adjust spacing between items */
 }
 
-.count{
-    width:  150px;
+.grid-item {
+    padding: 10px;
+    background-color: whitesmoke; /* Default background color */
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s; /* Smooth transition for background color */
+    cursor: pointer; /* Change cursor to pointer on hover */
 }
 
-.gap-8{
-    gap: 8px;
+.grid-item.selected {
+    background-color: red; /* Change background color when selected */
+    color: yellow;
 }

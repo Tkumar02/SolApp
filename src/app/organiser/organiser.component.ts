@@ -18,229 +18,169 @@ interface Allocation {
 
 export class OrganiserComponent {
 
-  membersAllocated: boolean = false;
   allMembers: any;
   allInstruments: any;
-  selectedInstruments:Array<string> = []
-  final:Array<Allocation> = []
-  instrumentCount: Array<any> = []
 
   memberForm!: FormGroup;
-  instrumentForm!: FormGroup;
   gigName: string = '';
   gigDate: Date;
+  gigType: string = '';
+  selectedMembers = [];
+  final: Array<Allocation> = [];
 
   constructor(
     private ms: MembersService, 
     private toast: ToastrService,
-    private fb:FormBuilder,
     private is: InstrumentsService,
   ){}
 
   ngOnInit(): void{
     this.ms.getMembers().subscribe(val=>{
       this.allMembers = val;
+      this.allMembers.sort((a, b) => a.name.localeCompare(b.name));
+      this.allMembers.forEach(member=> {
+        member.instruments = member.instruments.filter(instrument=>instrument !== null && instrument !== '')
+      })
     });
     this.is.getAllInstruments().subscribe(val=>{
       this.allInstruments = val;
-      this.allInstruments.forEach(item => {
-        this.instrumentCount.push({instrument: item.instrument,count:0})
-      })
-      console.log(this.instrumentCount)
-    })
-    this.memberForm = this.fb.group({
-      members: this.fb.array([this.createMemberGroup()])
-    })
-    this.instrumentForm = this.fb.group({
-      instruments: this.fb.array([this.createInstrumentGroup(0)])
     })
   }
 
-  createMemberGroup(): FormGroup {
-    return this.fb.group({
-      name:['', Validators.required]
-    })
+  toggleMemberSelection(member) {
+    member.selected = !member.selected; // Toggle the selected state
+    //console.log(`${member.name} selected: ${member.selected}`);
   }
 
-  createInstrumentGroup(nextIndex: number): FormGroup {
-    return this.fb.group({
-      name:['', Validators.required],
-      index: [nextIndex]
-    })
+  submitSelection(){
+    this.selectedMembers = this.allMembers
+      .filter(member => member.selected)
+      .map(member=>member.name);
+    //console.log('Selected members:', this.selectedMembers);
   }
 
-  increment(i:number){
-    this.instrumentCount[i].count++
+  checkGig(){
+    //console.log(this.gigType)
   }
-
-  decrement(i:number){
-    if(this.instrumentCount[i].count>0){
-      this.instrumentCount[i].count--
-    }
-  }
-
-  get members(): FormArray {
-    return this.memberForm.get('members') as FormArray;
-  }
-
-  get instruments(): FormArray {
-    return this.instrumentForm.get('instruments') as FormArray;
-  }
-
-  addMember(){
-    this.members.push(this.createMemberGroup())
-  }
-
-  addInstrument(){
-    const nextIndex = this.instruments.length;
-    this.instruments.push(this.createInstrumentGroup(nextIndex))
-  }
-
-  onSubmit(): void {
-    if(this.memberForm.valid) {
-      console.log('Form Submitted', this.memberForm.value)
-    }
-  }
-
-  submitInstruments(){
-    console.log(this.instrumentForm.value)
-  }
-
-//   allocateMembers() {
-//     const selectedMembers = this.memberForm.value.members.map(member => member.name);
-//     const filteredMembers = this.allMembers.filter(member => selectedMembers.includes(member.name));
-    
-//     // Copy the members to ensure we can modify the list during allocation
-//     let membersList = [...selectedMembers];  // CHANGE: Moved from for loop to initialization.
-    
-//     // Extract the list of instruments (including duplicates if any)
-//     let instrumentsList = this.instrumentForm.value.instruments.map(instrument => instrument.name);  // No changes here.
-
-//     // Outer loop goes over instruments
-//     for (let instrument of instrumentsList) {  // Loop over all instruments, even if duplicated.
-//         // Inner loop goes over members
-//         for (let member of filteredMembers) {
-//             // Check if the member can play this instrument AND is still in the membersList
-//             if (member.instruments.includes(instrument) && membersList.includes(member.name)) {
-//                 console.log(member.name, instrument);
-                
-//                 // Create the allocation object
-//                 const allocation = { name: member.name, instrument: instrument };
-//                 this.final.push(allocation);
-
-//                 // Remove the allocated member from membersList
-//                 membersList = membersList.filter(item => item !== member.name);  // CHANGE: Ensure that member is removed from the allocation list.
-                
-//                 // Move to the next instrument
-//                 break;  // Still break out of the inner loop after one allocation per instrument.
-//             }
-//         }
-//     }
-
-//     // Flag to indicate that members have been allocated
-//     this.membersAllocated = true;
-//     console.log(this.final, 'FINAL');
-// }
-
 
   allocateMembers(){
-    const selectedMembers = this.memberForm.value.members.map(member=>member.name)
-    const filteredMembers = this.allMembers.filter(member=>selectedMembers.includes(member.name))    
-    let membersList = [...selectedMembers];
-    let instrumentsList = this.instrumentForm.value.instruments.map(
-      instrument => instrument.name);
-
-    
-    for(let instrument of instrumentsList){
-      for(let member of filteredMembers){
-        if(member.instruments.includes(instrument) && membersList.includes(member.name)){
-          console.log(member.name,instrument)
-          const allocation = { name: member.name, instrument: instrument };
-          this.final.push(allocation)
-          membersList = membersList.filter(item=>item!=member.name);
-          break;
+    if(this.gigType == ''){
+      //console.log(this.gigType)
+      this.toast.error('no Gig type selected')
+      return;
+    }
+    this.final = [];
+    const gigMembers = this.allMembers.filter(member => member.selected)
+    let members = this.allMembers.map(member=>member.name)
+    const instruments = this.allInstruments.map(instrument => instrument.instrument)
+    for(let member of gigMembers){
+      //console.log(member.instruments, member.instruments.length)
+      if(member.instruments.length==1){
+        let obj = {name:'',instrument:''}
+        obj.name = member.name
+        obj.instrument = member.instruments[0]
+        this.final.push(obj)
+        members = members.filter(name=>name!==member.name)
+      }
+    }
+    let countRep = 0;
+    for(let member of gigMembers){
+      if(member.instruments.includes('Rep-Leader')&&countRep==0&&members.includes(member.name)){
+        let obj = {name:'',instrument:'Rep-Leader'}
+        obj.name = member.name;
+        this.final.push(obj);
+        members = members.filter(name=>name!==member.name)
+        countRep++
+        //console.log(countRep)
+      }
+    }
+    let markCount = 3
+    if(gigMembers.length>=20 && this.gigType=='Procession'){
+      for(let member of gigMembers){
+        if(member.instruments.includes('Marking')&& members.includes(member.name)&&markCount>0){
+          let obj = {name:'',instrument:'Marking'}
+          obj.name = member.name
+          this.final.push(obj)
+          members = members.filter(name=>name!==member.name)
+          markCount--
         }
       }
     }
-    
+    if(gigMembers.length>=20 && this.gigType=='Standing'){
+      for(let member of gigMembers){
+        if(member.instruments.includes('Marking')&& members.includes(member.name)&&markCount>2){
+          let obj = {name:'',instrument:'Marking'}
+          obj.name = member.name
+          this.final.push(obj)
+          members = members.filter(name=>name!==member.name)
+          markCount--
+        }
+      }
+    }
+    let rollersCount = [];
+    let thirdCount = [];
+    let bothCount = [];
+    for(let member of gigMembers){
+      if(member.instruments.includes('Third') && member.instruments.includes('Roller') && members.includes(member.name)){
+        bothCount.push(member.name)
+        console.log(member.name,'both')
+      }
+      else if(member.instruments.includes('Roller') && members.includes(member.name)){
+        rollersCount.push(member.name)
+        console.log(member.name,'Roller')
+      }
+      else if(member.instruments.includes('Third') && members.includes(member.name)){
+        thirdCount.push(member.name)
+      }
+    }
+    switch(thirdCount.length){
+      case 0:
+        if(bothCount.length>0 && rollersCount.length>bothCount.length){
+          let n = rollersCount.length/bothCount.length
+          
+        }
+        break;
+      case 1:
+    }
+    const n = rollersCount.length / thirdCount.length
+    console.log(n)
+    for(let i=0;i++;i<n+1){
+      console.log('final Thirds: ',thirdCount[i])
+    }
 
-    this.membersAllocated = true;
-    console.log(this.final,'FINAL')
+    const newIList =['Roller','Timbal','Caixa','Rep']
+    for(let member of gigMembers){
+      for(let instrument of newIList){
+        if(members.includes(member.name) && member.instruments.includes(instrument)){
+          let obj = {name:'',instrument:''}
+          obj.name = member.name
+          obj.instrument = instrument
+          this.final.push(obj)
+          members = members.filter(name=>name!==member.name)
+          //console.log(members)
+        }
+      }
+    }
+    //console.log(this.final)
   }
 
-  // onMemberSelected(i:number){
-  //   const name = this.memberForm.value.members[i].name
-  //   const index = this.allNames.indexOf(name)
-  //   this.allNames.splice(index,1)
+  // allocateMembers(){
+  //   const gigMembers = this.allMembers.filter(member => member.selected)
+  //   let members = this.allMembers.map(member=>member.name)
+  //   console.log(members)
+  //   const instruments = this.allInstruments.map(instrument => instrument.instrument)
+  //   gigMembers.sort((a, b) => a.instruments.length - b.instruments.length);
+  //   for(let member of gigMembers){
+  //     for(let instrument of instruments){
+  //       if(member.instruments.includes(instrument) && members.includes(member.name)){
+  //         let obj = {name:'',instrument:''}
+  //         obj.name = member.name
+  //         obj.instrument = instrument
+  //         this.final.push(obj)
+  //         members = members.filter(name=>name!==member.name)
+  //       }
+  //     }
+  //   }
+  //   console.log(this.final, 'final')
   // }
-
-//   allocateMembers(){
-//     const selectedMembers = this.memberForm.value.members.map(member=>member.name)
-//     const filteredMembers = this.allMembers.filter(member=>selectedMembers.includes(member.name))
-//     console.log(filteredMembers,'filtered members')
-//     let membersList = []
-//     console.log(filteredMembers,'selected members')
-//     for(let member of filteredMembers){
-//       console.log(member.instruments,'member instruments',member.name, 'names')
-//     }
-//     for(let member of selectedMembers){
-//       membersList.push(member)
-//     }
-//     console.log('check here', membersList)
-//     console.log(selectedMembers,'selected members, at the end')
-//     while(membersList.length>0){
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Marking') && membersList.includes(member.name)){
-//           console.log(member.name,'WORKS!!!!')
-//           this.markingI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Rep') && membersList.includes(member.name)){
-//           this.repI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Roller') && membersList.includes(member.name)){
-//           this.rollerI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Timbal') && membersList.includes(member.name)){
-//           this.timbalI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Caixa') && membersList.includes(member.name)){
-//           this.caixaI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Third') && membersList.includes(member.name)){
-//           this.thirdI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//       for(let member of filteredMembers){
-//         if(member.instruments.includes('Shaker') && membersList.includes(member.name)){
-//           this.shakerI.push(member.name);
-//           membersList = membersList.filter(item=>item!=member.name);
-//           break;
-//         }
-//       }
-//     }
-//     console.log(membersList,'membersList')
-//     this.membersAllocated = true;
-//   }
 }
