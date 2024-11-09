@@ -10,6 +10,11 @@ interface Allocation {
   instrument: string;
 }
 
+interface Person {
+  name: string;
+  instruments: string[];
+}
+
 @Component({
   selector: 'app-organiser',
   templateUrl: './organiser.component.html',
@@ -20,6 +25,10 @@ export class OrganiserComponent {
 
   allMembers: any;
   allInstruments: any;
+
+  rollerPlayersCount: number = 0; // Number of allocated roller players
+  thirdCount: number = 0; // Number of allocated thirds
+
 
   memberForm!: FormGroup;
   gigName: string = '';
@@ -73,8 +82,10 @@ export class OrganiserComponent {
     const gigMembers = this.allMembers.filter(member => member.selected)
     let members = this.allMembers.map(member=>member.name)
     const instruments = this.allInstruments.map(instrument => instrument.instrument)
+
+    //1. Assign anyone who only plays one instrument 
     for(let member of gigMembers){
-      //console.log(member.instruments, member.instruments.length)
+      //console.log(member.name,member.instruments, member.instruments.length)
       if(member.instruments.length==1){
         let obj = {name:'',instrument:''}
         obj.name = member.name
@@ -83,18 +94,26 @@ export class OrganiserComponent {
         members = members.filter(name=>name!==member.name)
       }
     }
-    let countRep = 0;
+    
+    //2. Assign Rep-Leader if not already assigned
+    const checkRepLeader = this.final.some(member => member.instrument.includes('Rep-Leader'))
     for(let member of gigMembers){
-      if(member.instruments.includes('Rep-Leader')&&countRep==0&&members.includes(member.name)){
+      if(member.instruments.includes('Rep-Leader')&&members.includes(member.name) && !checkRepLeader){
         let obj = {name:'',instrument:'Rep-Leader'}
         obj.name = member.name;
         this.final.push(obj);
         members = members.filter(name=>name!==member.name)
-        countRep++
-        //console.log(countRep)
+        break;
       }
     }
-    let markCount = 3
+
+    //3. Assign Marking and check if anyone has already been assigned marking
+    let markCount = 4
+    for(let obj of this.final){
+      if(obj.instrument=='Marking'){
+        markCount--
+      }
+    }
     if(gigMembers.length>=20 && this.gigType=='Procession'){
       for(let member of gigMembers){
         if(member.instruments.includes('Marking')&& members.includes(member.name)&&markCount>0){
@@ -106,7 +125,7 @@ export class OrganiserComponent {
         }
       }
     }
-    if(gigMembers.length>=20 && this.gigType=='Standing'){
+    if((gigMembers.length>=20 && this.gigType=='Standing') || (gigMembers.length<20 && this.gigType=='Procession')){
       for(let member of gigMembers){
         if(member.instruments.includes('Marking')&& members.includes(member.name)&&markCount>2){
           let obj = {name:'',instrument:'Marking'}
@@ -117,70 +136,94 @@ export class OrganiserComponent {
         }
       }
     }
-    let rollersCount = [];
-    let thirdCount = [];
-    let bothCount = [];
-    for(let member of gigMembers){
-      if(member.instruments.includes('Third') && member.instruments.includes('Roller') && members.includes(member.name)){
-        bothCount.push(member.name)
-        console.log(member.name,'both')
+
+    //4. Check what is the lowest number of instruments that are known to the members
+    const instList =['Roller','Timbal','Caixa','Rep','Third']
+
+    const instrumentAllocations: Record<string, string[]> = {};
+    const personAllocated: Record<string, boolean> = {};
+    const maxPlayersPerInstrument = Math.ceil(members.length / instList.length);
+
+    // Step 1: Build preference lists for each allowed instrument
+    const instrumentPreferences: Record<string, { name: string; rank: number }[]> = {};
+
+    gigMembers.forEach(person => {
+      if (members.includes(person.name)) { // Only consider unallocated members
+        personAllocated[person.name] = false;
+        person.instruments.forEach((instrument, index) => {
+          if (instList.includes(instrument)) {
+            if (!instrumentPreferences[instrument]) {
+              instrumentPreferences[instrument] = [];
+            }
+            instrumentPreferences[instrument].push({ name: person.name, rank: index });
+          }
+        });
       }
-      else if(member.instruments.includes('Roller') && members.includes(member.name)){
-        rollersCount.push(member.name)
-        console.log(member.name,'Roller')
-      }
-      else if(member.instruments.includes('Third') && members.includes(member.name)){
-        thirdCount.push(member.name)
-      }
+    });
+
+    // Sort each instrument's player list by preference rank
+    for (const instrument in instrumentPreferences) {
+      instrumentPreferences[instrument].sort((a, b) => a.rank - b.rank);
     }
-    switch(thirdCount.length){
-      case 0:
-        if(bothCount.length>0 && rollersCount.length>bothCount.length){
-          let n = rollersCount.length/bothCount.length
+
+    // Step 2: Allocate each person to their highest preferred instrument
+    for (const instrument of instList) {
+      instrumentAllocations[instrument] = [];
+      for (const { name } of instrumentPreferences[instrument] || []) {
+        if (
+          !personAllocated[name] &&
+          instrumentAllocations[instrument].length < maxPlayersPerInstrument
+        ) {
+          // Check for the roller rule: for every 3 roller players, we need at least 1 third
+          if (instrument === 'roller') {
+            if (this.rollerPlayersCount - (this.thirdCount * 3) >= 3) {
+              // If there are 3 roller players for every third, we skip adding more roller players
+              continue;
+            }
+            this.rollerPlayersCount++;
+          } else if (instrument === 'drums') {
+            this.thirdCount++;
+          }
+
+          instrumentAllocations[instrument].push(name);
+          members = members.filter(memberName => memberName !== name); // Remove from membersName
+          personAllocated[name] = true;
           
-        }
-        break;
-      case 1:
-    }
-    const n = rollersCount.length / thirdCount.length
-    console.log(n)
-    for(let i=0;i++;i<n+1){
-      console.log('final Thirds: ',thirdCount[i])
-    }
-
-    const newIList =['Roller','Timbal','Caixa','Rep']
-    for(let member of gigMembers){
-      for(let instrument of newIList){
-        if(members.includes(member.name) && member.instruments.includes(instrument)){
-          let obj = {name:'',instrument:''}
-          obj.name = member.name
-          obj.instrument = instrument
-          this.final.push(obj)
-          members = members.filter(name=>name!==member.name)
-          //console.log(members)
+          // Add allocation to finalArray in the desired format
+          this.final.push({ name, instrument });
         }
       }
     }
-    //console.log(this.final)
-  }
 
-  // allocateMembers(){
-  //   const gigMembers = this.allMembers.filter(member => member.selected)
-  //   let members = this.allMembers.map(member=>member.name)
-  //   console.log(members)
-  //   const instruments = this.allInstruments.map(instrument => instrument.instrument)
-  //   gigMembers.sort((a, b) => a.instruments.length - b.instruments.length);
-  //   for(let member of gigMembers){
-  //     for(let instrument of instruments){
-  //       if(member.instruments.includes(instrument) && members.includes(member.name)){
-  //         let obj = {name:'',instrument:''}
-  //         obj.name = member.name
-  //         obj.instrument = instrument
-  //         this.final.push(obj)
-  //         members = members.filter(name=>name!==member.name)
-  //       }
-  //     }
-  //   }
-  //   console.log(this.final, 'final')
-  // }
+    // Step 3: Handle unallocated people by trying to find them an available spot
+  gigMembers.forEach(person => {
+      if (!personAllocated[person.name] && members.includes(person.name)) {
+        for (const instrument of person.instruments) {
+          if (
+            instList.includes(instrument) &&
+            instrumentAllocations[instrument].length < maxPlayersPerInstrument
+          ) {
+            // Check for the roller rule: for every 3 roller players, we need at least 1 third
+            if (instrument === 'Roller') {
+              if (this.rollerPlayersCount - (this.thirdCount * 3) >= 3) {
+                // If there are 3 roller players for every third, we skip adding more roller players
+                continue;
+              }
+              this.rollerPlayersCount++;
+            } else if (instrument === 'Third') {
+              this.thirdCount++;
+            }
+
+            instrumentAllocations[instrument].push(person.name);
+            members = members.filter(memberName => memberName !== person.name); // Remove from membersName
+            personAllocated[person.name] = true;
+
+            // Add allocation to finalArray in the desired format
+            this.final.push({ name: person.name, instrument:instrument });
+            break;
+          }
+        }
+      }
+    });
+  }
 }
