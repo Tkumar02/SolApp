@@ -21,6 +21,7 @@ import { MemberEditComponent } from './member-edit/member-edit.component';
 import { InactiveMembersComponent } from './inactive-members/inactive-members.component';
 import { HomeComponent } from './home/home.component';
 import { AllocationComponent } from './organiser/allocation/allocation.component';
+import { ViewGigsComponent } from './view-gigs/view-gigs.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { AllocationComponent } from './organiser/allocation/allocation.component
     InactiveMembersComponent,
     HomeComponent,
     AllocationComponent,
+    ViewGigsComponent,
   ],
   imports: [
     BrowserModule,

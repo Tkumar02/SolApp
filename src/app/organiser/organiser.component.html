@@ -10,7 +10,7 @@
             <option [value]="'Procession'">Procession</option>
         </select>
         <label for="gigDate">Enter date of Gig: </label>
-        <input type="date" [(ngModel)]="gigDate">
+        <input type="date" [(ngModel)]="gigDate" [min]="today">
         
     </div>
 
@@ -22,16 +22,6 @@
                  [ngClass]="{'selected': member.selected}"
                  (click)="toggleMemberSelection(member)">
                 <div class="mr-3">{{ member.name }}</div>
-            </div>
-        </div>
-        <!-- <div class="d-flex flex-column align-items-center mt-2">
-            <button class="btn btn-primary" (click)="allocateMembers()">Allocate</button>
-            <button class="btn btn-primary" (click)="allocateNew()">{{confirmMembers ? 'Confirm Members' : 'View Members'}}</button>
-        </div> -->
-
-        <div class="allocations">
-            <div *ngFor="let member of final">
-                {{member.name}} - {{member.instrument}}
             </div>
         </div>
     </div>
@@ -48,6 +38,6 @@
             <!-- <button class="btn btn-primary" (click)="allocateMembers()">Allocate</button> -->
             <button class="btn btn-primary" (click)="allocateNew()">{{confirmMembers ? 'Confirm Members' : 'Reselect Members'}}</button>
         </div>
-        <app-allocation *ngIf="showAllocateNew" [players]="players" [gigType]="gigType"></app-allocation>
+        <app-allocation *ngIf="showAllocateNew" [players]="players" [gigType]="gigType" [gigDate]="gigDate" [gigName]="gigName"></app-allocation>
     </div>
 </div>

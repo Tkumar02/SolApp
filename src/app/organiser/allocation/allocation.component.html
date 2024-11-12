@@ -5,14 +5,55 @@
         <h3>{{ instrument }}</h3>
         <p> ({{ assignedInstruments[instrument]?.length }} players)</p>
         <ul>
-            <li *ngFor="let player of assignedInstruments[instrument]">{{ player }}</li>
+            <li *ngFor="let player of assignedInstruments[instrument]">
+                {{ player }}
+                <button (click)="onReassignClick(player, instrument)">Reassign</button>
+            </li>
         </ul>
     </div>
-      
+    
+    <!-- Reassignment Form - shows only if a player is selected for reassignment -->
+    <div *ngIf="selectedPlayer">
+        <label for="newInstrument">Reassign {{ selectedPlayer.name }} to:</label>
+        <select [(ngModel)]="selectedInstrument" id="newInstrument">
+            <option *ngFor="let instrument of availableInstruments" [value]="instrument">
+                {{ instrument }}
+            </option>
+        </select>
+        <button (click)="confirmReassignment()">Confirm</button>
+        <button (click)="cancelReassignment()">Cancel</button>
+    </div>
       
 </div>
 
-<button (click)="submit()">Submit Allocations</button>
+<!-- Bootstrap Modal for Reassignment -->
+<div class="modal fade" id="reassignModal" tabindex="-1" aria-labelledby="reassignModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="reassignModalLabel">Reassign {{ selectedPlayer?.name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Current Instrument: {{ selectedPlayer?.currentInstrument }}</p>
+          <label for="newInstrument">Select New Instrument:</label>
+          <select class="form-select" [(ngModel)]="selectedInstrument" id="newInstrument">
+            <option *ngFor="let instrument of getInstrumentNames()" [value]="instrument">
+              {{ instrument }}
+            </option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelReassignment()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="confirmReassignment()" [disabled]="!selectedInstrument" data-bs-dismiss="modal">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<button *ngIf="show" class="btn btn-success" (click)="submit()">Submit Allocations</button>
 
 <!-- Modal for changing instrument -->
 <!-- <div *ngIf="selectedPlayer" class="modal">

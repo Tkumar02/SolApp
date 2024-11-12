@@ -1,4 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { GigsService } from '../../services/gigs.service';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 interface Player {
   name: string;
@@ -9,6 +12,8 @@ interface AssignedInstruments {
   [instrument: string]: string[];
 }
 
+declare var bootstrap: any;
+
 @Component({
   selector: 'app-allocation',
   templateUrl: './allocation.component.html',
@@ -18,11 +23,22 @@ export class AllocationComponent implements OnInit {
 
   @Input() players: Array<Player> = []; // Ensure default empty array to avoid undefined issues
   @Input() gigType!: string; // Marking gigType as required (non-null)
+  @Input() gigDate: Date;
+  @Input() gigName: string;
   
   assignedInstruments: AssignedInstruments = {}; // Store assigned instruments here
   show: boolean = false;
+  selectedPlayer: { name: string; currentInstrument: string } | null = null;
+  selectedInstrument: string = '';
+  availableInstruments: string[] = []; // Instruments player can actually play
 
-  constructor() {}
+  @ViewChild('reassignModal') reassignModal!: ElementRef;
+
+  constructor(
+    private gs: GigsService,
+    private toast: ToastrService,
+    private route: Router,
+  ) {}
 
   ngOnInit(): void {
     // Call assignInstruments during initialization to populate assignedInstruments
@@ -135,131 +151,72 @@ export class AllocationComponent implements OnInit {
     return Object.keys(this.assignedInstruments);
   }
 
+  // Triggered when the user clicks "Reassign" next to a player's name
+  onReassignClick(player: string, currentInstrument: string) {
+    //this.selectedPlayer = { name: player, currentInstrument };
+    //this.selectedInstrument = ''; // Reset the selected instrument for the form
+
+    const playerDetails = this.players.find(p => p.name === player);
+
+    if (playerDetails) {
+      this.selectedPlayer = { name: player, currentInstrument };
+      this.availableInstruments = playerDetails.instruments; // Set available instruments
+      this.selectedInstrument = ''; // Reset selected instrument
+    }
+  }
+
+  // Open the modal for reassignment
+  openReassignModal(player: string, currentInstrument: string) {
+    this.selectedPlayer = { name: player, currentInstrument };
+    this.selectedInstrument = ''; // Reset selection
+
+    const modal = new bootstrap.Modal(this.reassignModal.nativeElement);
+    modal.show();
+  }
+
+  // Finalizes the reassignment
+  confirmReassignment() {
+    if (this.selectedPlayer && this.selectedInstrument) {
+      const { name, currentInstrument } = this.selectedPlayer;
+
+      // Remove player from current instrument
+      this.assignedInstruments[currentInstrument] = this.assignedInstruments[currentInstrument].filter(
+        playerName => playerName !== name
+      );
+
+      // Add player to new instrument
+      this.assignedInstruments[this.selectedInstrument].push(name);
+
+      // Reset selection and close form
+      this.selectedPlayer = null;
+      this.selectedInstrument = '';
+    }
+  }
+
+  // Cancels the reassignment process
+  cancelReassignment() {
+    this.selectedPlayer = null;
+    this.selectedInstrument = '';
+  }
+
   submit(){
-    console.log(this.assignInstruments)
+    if(!this.gigDate || !this.gigName){
+      this.toast.error('Please ensure Gig date and name is completed before submitting');
+      return;
+    }
+    const form = {
+      date: this.gigDate,
+      name: this.gigName,
+      type:this.gigType,
+      allocations: this.assignedInstruments
+    }
+    
+    console.log(this.assignedInstruments)
+    this.gs.addGig(form)
+    this.toast.success('Gig successfully submitted')
+    this.route.navigate(['view'])
   }
 }
 
 
 
-
-
-// import { Component, Input, OnInit } from '@angular/core';
-
-// interface Player {
-//   id: string;
-//   name: string;
-//   instruments: string[];
-// }
-
-// interface AssignedInstruments {
-//   [instrument: string]: Player[];
-// }
-
-// @Component({
-//   selector: 'app-allocation',
-//   templateUrl: './allocation.component.html',
-//   styleUrls: ['./allocation.component.css']
-// })
-// export class AllocationComponent implements OnInit {
-
-//   @Input() players: Array<Player> = []; // Ensure default empty array to avoid undefined issues
-//   @Input() gigType: string;
-//   assignments: AssignedInstruments = {}; // Store assigned instruments here
-//   show: boolean = false;
-
-//   constructor() {}
-
-//   ngOnInit(): void {
-//     // Can optionally add initialization here if needed
-//   }
-
-//   assignInstruments(): void {
-//     this.show = true;
-//     const setType = this.gigType
-//     let players = [...this.players]
-//     const assigned: AssignedInstruments = {
-//       Marking: [],
-//       Timbal: [],
-//       Caixa: [],
-//       Roller: [],
-//       Rep: [],
-//       'Rep-Leader': [],
-//       Third: [],
-//       Shaker: []
-//     };
-
-//     // Step 1: Assign players with only one instrument choice
-//     players.forEach(player => {
-//       if (player.instruments.length === 1) {
-//         const instrument = player.instruments[0];
-//         assigned[instrument].push(player);
-//         console.log('START',assigned,'HERE')
-//       }
-//     });
-
-//     // Filter out assigned players from the main list
-//     players = players.filter(player => player.instruments.length > 1 || assigned[player.instruments[0]].includes(player));
-
-//     // Step 2: Assign one `rep-leader` if available
-//     const repLeaders = players.filter(player => player.instruments.includes('Rep-Leader'));
-//     if (repLeaders.length > 0 && assigned['Rep-Leader'].length<1) {
-//       const chosenRepLeader = repLeaders[0];
-//       assigned['Rep-Leader'].push(chosenRepLeader);
-//       players = players.filter(player => player.id !== chosenRepLeader.id);
-//     }
-
-//     // Step 3: Assign `marking` instruments based on set type
-//     const markingCount = (setType == 'Procession' && players.length > 20) 
-//     ? 4 
-//     : (setType == 'Standing' && players.length < 20) 
-//     ? 1 
-//     : 2;
-//     const markingPlayers = players.filter(player => player.instruments.includes('Marking')).slice(0, markingCount);
-//     markingPlayers.forEach(player => {
-//       assigned['Marking'].push(player);
-//       players = players.filter(p => p.id !== player.id);
-//     });
-
-//     // Step 4: Assign players who now have only one remaining instrument option
-//     players.forEach(player => {
-//       const remainingInstruments = player.instruments.filter(instr => !assigned[instr].includes(player));
-//       if (remainingInstruments.length === 1) {
-//         const instrument = remainingInstruments[0];
-//         assigned[instrument].push(player);
-//       }
-//     });
-
-//     // Filter again after assigning players with only one option left
-//     players = players.filter(player => !Object.values(assigned).some(group => group.includes(player)));
-
-//     // Step 5: For every three `roller` players, assign one `third` (if possible)
-//     let rollerCount = players.filter(player => player.instruments.includes('Roller')).length;
-//     let thirdCount = Math.floor(rollerCount / 3);
-//     const rollerPlayers = players.filter(player => player.instruments.includes('Roller')).slice(0, rollerCount);
-//     const thirdPlayers = players.filter(player => player.instruments.includes('Third')).slice(0, thirdCount);
-
-//     rollerPlayers.forEach(player => {
-//       assigned['Roller'].push(player);
-//       players = players.filter(p => p.id !== player.id);
-//     });
-//     thirdPlayers.forEach(player => {
-//       assigned['Third'].push(player);
-//       players = players.filter(p => p.id !== player.id);
-//     });
-
-//     // Step 6: Distribute remaining players evenly across other instruments
-//     const remainingInstruments = ['Timbal', 'Caixa', 'Rep'];
-//     players.forEach((player) => {
-//       for (let instrument of remainingInstruments) {
-//         if (player.instruments.includes(instrument) && assigned[instrument].length <= assigned['Marking'].length) {
-//           assigned[instrument].push(player);
-//           break;
-//         }
-//       }
-//     });
-
-//     // Store the final assignments in the component property
-//     this.assignments = assigned;
-//   }
-// }
