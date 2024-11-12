@@ -20,6 +20,7 @@ import { AddInstrumentComponent } from './add-instrument/add-instrument.componen
 import { MemberEditComponent } from './member-edit/member-edit.component';
 import { InactiveMembersComponent } from './inactive-members/inactive-members.component';
 import { HomeComponent } from './home/home.component';
+import { AllocationComponent } from './organiser/allocation/allocation.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { HomeComponent } from './home/home.component';
     MemberEditComponent,
     InactiveMembersComponent,
     HomeComponent,
+    AllocationComponent,
   ],
   imports: [
     BrowserModule,

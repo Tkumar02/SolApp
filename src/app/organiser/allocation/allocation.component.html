@@ -1,0 +1,50 @@
+<button class="btn btn-info mt-3 mb-3" (click)="showDiv()">Assign Instruments</button>
+
+<div *ngIf="show">
+    <div *ngFor="let instrument of getInstrumentNames()">
+        <h3>{{ instrument }}</h3>
+        <p> ({{ assignedInstruments[instrument]?.length }} players)</p>
+        <ul>
+            <li *ngFor="let player of assignedInstruments[instrument]">{{ player }}</li>
+        </ul>
+    </div>
+      
+      
+</div>
+
+<button (click)="submit()">Submit Allocations</button>
+
+<!-- Modal for changing instrument -->
+<!-- <div *ngIf="selectedPlayer" class="modal">
+  <div class="modal-content">
+    <h3>Select a new instrument for {{ selectedPlayer.name }}</h3>
+    <ul>
+      <li *ngFor="let instrument of selectedPlayer.instruments">
+        <button (click)="handleManualInstrumentChange(selectedPlayer, instrument)">{{ instrument }}</button>
+      </li>
+    </ul>
+    <button (click)="closeModal()">Close</button>
+  </div>
+</div> -->
+
+
+
+
+
+<!-- <button class="btn btn-primary mt-2 mb-2" (click)="assignInstruments()">Assign players</button>
+
+<div *ngIf="assignments && show">
+  <h3>Instrument Assignments:</h3>
+  <div *ngFor="let entry of assignments | keyvalue">
+    <h4>{{ entry.key | titlecase }}:</h4>
+    <ul>
+      <li *ngFor="let player of entry.value">{{ player.name }}</li>
+    </ul>
+  </div>
+</div> -->
+  
+
+
+  
+
+

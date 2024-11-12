@@ -37,6 +37,10 @@ export class OrganiserComponent {
   selectedMembers = [];
   final: Array<Allocation> = [];
 
+  players: any;
+  showAllocateNew: boolean = false;
+  confirmMembers: boolean = true;
+
   constructor(
     private ms: MembersService, 
     private toast: ToastrService,
@@ -68,8 +72,16 @@ export class OrganiserComponent {
     //console.log('Selected members:', this.selectedMembers);
   }
 
-  checkGig(){
-    //console.log(this.gigType)
+
+  allocateNew(){
+    if(this.gigType == ''){
+      //console.log(this.gigType)
+      this.toast.error('no Gig type selected')
+      return;
+    }
+    this.players = this.allMembers.filter(member => member.selected)
+    this.showAllocateNew = true;
+    this.confirmMembers = !this.confirmMembers
   }
 
   allocateMembers(){
